@@ -13,10 +13,12 @@ public class AVRCore {
 	private boolean c = false;
 
 	private byte[] progmem;
+	private IAddressSpace datamem;
 
-	public AVRCore(byte[] progmem) {
+	public AVRCore(byte[] progmem, IAddressSpace datamem) {
 
 		this.progmem = progmem;
+		this.datamem = datamem;
 
 	}
 
