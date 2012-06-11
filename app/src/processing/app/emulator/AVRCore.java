@@ -38,7 +38,7 @@ public class AVRCore {
 		if (instruction == 0x0000)
 			return 1;
 
-		// Direct Register Addressing, Two Registers
+		// 2-operand instructions
 		// 0000 01rd dddd rrrr
 		// 0000 1xrd dddd rrrr
 		// 0001 xxrd dddd rrrr
@@ -50,8 +50,7 @@ public class AVRCore {
 				|| (instruction & 0xF000) == 0x2000) {
 
 			int rr = ((instruction & 0x0200) >> 5) & (instruction & 0x000F);
-			int rd = ((instruction & 0x0100) >> 4)
-					& ((instruction & 0x00F0) >> 8);
+			int rd = (instruction & 0x01F0) >> 4;
 
 			int maskedInstruction = instruction & 0xFC00;
 
@@ -79,6 +78,32 @@ public class AVRCore {
 				return instructionSbc(rr, rd);
 			case 0x1800:
 				return instructionSub(rr, rd);
+
+			}
+
+		}
+
+		// 1-operand instructions
+		// 1001 010d dddd 0xxx
+		// 1001 010d dddd 1010 (DEC)
+
+		if ((instruction & 0xFE08) == 0x9400
+				|| (instruction & 0xFE0F) == 0x940A) {
+
+			int rd = (instruction & 0x01F0) >> 4;
+
+			int maskedInstruction = instruction & 0xFE08;
+
+			switch (maskedInstruction) {
+
+			case 0x9405:
+				return instructionAsr(rd);
+			case 0x9400:
+				return instructionCom(rd);
+			case 0x940A:
+				return instructionDec(rd);
+			case 0x9403:
+				return instructionInc(rd);
 
 			}
 
@@ -239,4 +264,62 @@ public class AVRCore {
 
 	}
 
+	private int instructionAsr(int rd) {
+
+		int res = r[rd] >> 1;
+
+		res &= (r[rd] & 0x80);
+
+		c = (r[rd] & 0x01) != 0;
+		z = (res == 0);
+		n = (res & 0x80) != 0;
+		v = n ^ c;
+		s = n ^ v;
+
+		r[rd] = res;
+
+		return 1;
+
+	}
+
+	private int instructionCom(int rd) {
+
+		int res = 0xFF - r[rd];
+
+		c = true;
+		z = (res == 0);
+		v = false;
+		n = (res & 0x80) != 0;
+		s = n ^ v;
+
+		r[rd] = res;
+
+		return 1;
+
+	}
+
+	private int instructionDec(int rd) {
+
+		int res = r[rd] - 1;
+
+		z = (res == 0);
+		n = (res & 0x80) != 0;
+		v = (res == 0x7F);
+		s = n ^ v;
+
+		return 1;
+	}
+
+	private int instructionInc(int rd) {
+
+		int res = r[rd] + 1;
+
+		z = (res == 0);
+		n = (res & 0x80) != 0;
+		v = (res == 0x80);
+		s = n ^ v;
+
+		return 1;
+
+	}
 }
