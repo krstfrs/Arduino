@@ -51,8 +51,8 @@ public class AVRCore {
 				|| (instruction & 0xF000) == 0x1000
 				|| (instruction & 0xF000) == 0x2000) {
 
-			int rr = ((instruction & 0x0200) >> 5) & (instruction & 0x000F);
-			int rd = (instruction & 0x01F0) >> 4;
+			int rr = ((instruction & 0x0200) >>> 5) & (instruction & 0x000F);
+			int rd = (instruction & 0x01F0) >>> 4;
 
 			int maskedInstruction = instruction & 0xFC00;
 
@@ -92,7 +92,7 @@ public class AVRCore {
 		if ((instruction & 0xFE08) == 0x9400
 				|| (instruction & 0xFE0F) == 0x940A) {
 
-			int rd = (instruction & 0x01F0) >> 4;
+			int rd = (instruction & 0x01F0) >>> 4;
 
 			int maskedInstruction = instruction & 0xFE08;
 
@@ -126,8 +126,8 @@ public class AVRCore {
 		if ((instruction & 0xF000) == 0x3000
 				|| (instruction & 0xC000) == 0x8000) {
 
-			int rd = ((instruction & 0x00F0) >> 4) + 0x10;
-			int k = ((instruction & 0x0F00) >> 4) & (instruction & 0x000F);
+			int rd = ((instruction & 0x00F0) >>> 4) + 0x10;
+			int k = ((instruction & 0x0F00) >>> 4) & (instruction & 0x000F);
 
 			int maskedInstruction = instruction & 0xF000;
 
@@ -153,8 +153,8 @@ public class AVRCore {
 
 		if ((instruction & 0xFE00) == 0x9600) {
 
-			int k = ((instruction & 0x00C0) >> 2) & (instruction & 0x000F);
-			int rdp = (((instruction & 0x0030) >> 4) << 1) + 24;
+			int k = ((instruction & 0x00C0) >>> 2) & (instruction & 0x000F);
+			int rdp = (((instruction & 0x0030) >>> 4) << 1) + 24;
 
 			int maskedInstruction = instruction & 0xFE00;
 
