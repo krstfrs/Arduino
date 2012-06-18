@@ -106,6 +106,35 @@ public class AVRCore {
 				return instructionDec(rd);
 			case 0x9403:
 				return instructionInc(rd);
+			case 0x9406:
+				return instructionLsr(rd);
+			case 0x9401:
+				return instructionNeg(rd);
+			case 0x9407:
+				return instructionRor(rd);
+			case 0x9402:
+				return instructionSwap(rd);
+
+			}
+
+		}
+
+		// ADIW/SBIW
+		// 1001 011x kkpp kkkk
+
+		if ((instruction & 0xFE00) == 0x9600) {
+
+			int k = ((instruction & 0x00C0) >> 2) & (instruction & 0x000F);
+			int rdp = (((instruction & 0x0030) >> 4) << 1) + 24;
+
+			int maskedInstruction = instruction & 0xFE00;
+
+			switch (maskedInstruction) {
+
+			case 0x9600:
+				instructionAdiw(rdp, k);
+			case 0x9700:
+				instructionSbiw(rdp, k);
 
 			}
 
@@ -120,7 +149,6 @@ public class AVRCore {
 	 * not yet implemented are recorded here alphabetically.
 	 */
 
-	// TODO: Implement ADIW
 	// TODO: Implement ANDI
 	// TODO: Implement BCLR
 	// TODO: Implement BLD
@@ -175,13 +203,10 @@ public class AVRCore {
 	// TODO: Implement LDI
 	// TODO: Implement LDS
 	// TODO: Implement LPM
-	// TODO: Implement LSL
-	// TODO: Implement LSR
 	// TODO: Implement MOVW
 	// TODO: Implement MUL
 	// TODO: Implement MULS
 	// TODO: Implement MULSU
-	// TODO: Implement NEG
 	// TODO: Implement NOP
 	// TODO: Implement ORI
 	// TODO: Implement OUT
@@ -191,13 +216,10 @@ public class AVRCore {
 	// TODO: Implement RET
 	// TODO: Implement RETI
 	// TODO: Implement RJMP
-	// TODO: Implement ROL
-	// TODO: Implement ROR
 	// TODO: Implement SBCI
 	// TODO: Implement SBI
 	// TODO: Implement SBIC
 	// TODO: Implement SBIS
-	// TODO: Implement SBIW
 	// TODO: Implement SBR
 	// TODO: Implement SBRC
 	// TODO: Implement SBRS
@@ -215,8 +237,6 @@ public class AVRCore {
 	// TODO: Implement ST
 	// TODO: Implement STS
 	// TODO: Implement SUBI
-	// TODO: Implement SWAP
-	// TODO: Implement TST
 	// TODO: Implement WDR
 	// TODO: Implement XCH
 
@@ -373,9 +393,31 @@ public class AVRCore {
 
 	private int instructionAsr(int rd) {
 
-		int res = r[rd] >> 1;
+		return instructionAsrLsrRor(rd, true, false);
 
-		res &= (r[rd] & 0x80);
+	}
+
+	private int instructionLsr(int rd) {
+
+		return instructionAsrLsrRor(rd, false, false);
+
+	}
+
+	private int instructionRor(int rd) {
+
+		return instructionAsrLsrRor(rd, false, true);
+
+	}
+
+	private int instructionAsrLsrRor(int rd, boolean arithmetic, boolean rotate) {
+
+		int res = r[rd] >>> 1;
+
+		if (arithmetic)
+			res &= (r[rd] & 0x80);
+
+		if (rotate)
+			res &= c ? 0x80 : 0;
 
 		c = (r[rd] & 0x01) != 0;
 		z = (res == 0);
@@ -391,7 +433,7 @@ public class AVRCore {
 
 	private int instructionCom(int rd) {
 
-		int res = 0xFF - r[rd];
+		int res = (0xFF - r[rd]) & 0xFF;
 
 		c = true;
 		z = (res == 0);
@@ -400,6 +442,24 @@ public class AVRCore {
 		s = n ^ v;
 
 		r[rd] = res;
+
+		return 1;
+
+	}
+
+	private int instructionNeg(int rd) {
+
+		int res = (0x00 - r[rd]) & 0xFF;
+
+		boolean rd3 = (r[rd] & 0x08) != 0;
+		boolean res3 = (res & 0x08) != 0;
+
+		h = rd3 & res3;
+		c = (res != 0);
+		z = (res == 0);
+		v = (res == 0x80);
+		n = (res & 0x80) != 0;
+		s = n ^ v;
 
 		return 1;
 
@@ -414,6 +474,8 @@ public class AVRCore {
 		v = (res == 0x7F);
 		s = n ^ v;
 
+		r[rd] = res;
+
 		return 1;
 	}
 
@@ -426,7 +488,60 @@ public class AVRCore {
 		v = (res == 0x80);
 		s = n ^ v;
 
+		r[rd] = res;
+
 		return 1;
 
 	}
+
+	private int instructionSwap(int rd) {
+
+		r[rd] = (r[rd] >>> 4) & (r[rd] << 4);
+
+		return 1;
+
+	}
+
+	private int instructionAdiw(int rdp, int k) {
+
+		int rrp = r[rdp] & (r[rdp + 1] << 8);
+		int res = rrp + k;
+
+		boolean rrp15 = (res & 0x8000) != 0;
+		boolean res15 = (res & 0x8000) != 0;
+
+		c = (!res15) && rrp15;
+		z = (res == 0);
+		n = res15;
+		v = (!rrp15) && res15;
+		s = n ^ v;
+
+		r[rdp] = res & 0xFF;
+		r[rdp + 1] = (res & 0xFF00) >>> 8;
+
+		return 2;
+
+	}
+
+	private int instructionSbiw(int rdp, int k) {
+
+		int rrp = r[rdp] & (r[rdp + 1] << 8);
+		int res = rrp - k;
+
+		boolean rrp15 = (res & 0x8000) != 0;
+		boolean res15 = (res & 0x8000) != 0;
+
+		c = res15 && (!rrp15);
+		z = (res == 0);
+		n = res15;
+		v = rrp15 && (!res15);
+		s = n ^ v;
+
+		r[rdp] = res & 0xFF;
+		r[rdp + 1] = (res & 0xFF00) >>> 8;
+
+		return 2;
+
+	}
+
 }
