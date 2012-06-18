@@ -119,6 +119,35 @@ public class AVRCore {
 
 		}
 
+		// Register-immediate instructions
+		// 0011 KKKK hhhh KKKK
+		// 01xx KKKK hhhh KKKK
+
+		if ((instruction & 0xF000) == 0x3000
+				|| (instruction & 0xC000) == 0x8000) {
+
+			int rd = ((instruction & 0x00F0) >> 4) + 0x10;
+			int k = ((instruction & 0x0F00) >> 4) & (instruction & 0x000F);
+
+			int maskedInstruction = instruction & 0xF000;
+
+			switch (maskedInstruction) {
+
+			case 0x7000:
+				return instructionAndi(rd, k);
+				// case 0x3000:
+				// return instructionCpi(rd, k);
+			case 0x6000:
+				return instructionOri(rd, k);
+				// case 0x4000:
+				// return instructionSbci(rd, k);
+				// case 0x9000:
+				// return instructionSubi(rd, k);
+
+			}
+
+		}
+
 		// ADIW/SBIW
 		// 1001 011x kkpp kkkk
 
@@ -149,7 +178,6 @@ public class AVRCore {
 	 * not yet implemented are recorded here alphabetically.
 	 */
 
-	// TODO: Implement ANDI
 	// TODO: Implement BCLR
 	// TODO: Implement BLD
 	// TODO: Implement BRBC
@@ -208,7 +236,6 @@ public class AVRCore {
 	// TODO: Implement MULS
 	// TODO: Implement MULSU
 	// TODO: Implement NOP
-	// TODO: Implement ORI
 	// TODO: Implement OUT
 	// TODO: Implement POP
 	// TODO: Implement PUSH
@@ -250,7 +277,13 @@ public class AVRCore {
 
 	private int instructionAnd(int rr, int rd) {
 
-		int res = r[rr] & r[rd];
+		return instructionAndi(rd, r[rr]);
+
+	}
+
+	private int instructionAndi(int rd, int k) {
+
+		int res = k & r[rd];
 
 		v = false;
 		z = (res == 0);
@@ -265,7 +298,13 @@ public class AVRCore {
 
 	private int instructionOr(int rr, int rd) {
 
-		int res = r[rr] | r[rd];
+		return instructionOri(rd, r[rr]);
+
+	}
+
+	private int instructionOri(int rd, int k) {
+
+		int res = k | r[rd];
 
 		v = false;
 		z = (res == 0);
