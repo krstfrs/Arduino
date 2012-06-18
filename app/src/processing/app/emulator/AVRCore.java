@@ -115,6 +115,111 @@ public class AVRCore {
 
 	}
 
+	/*
+	 * The implemented instructions are grouped by type, however instructions
+	 * not yet implemented are recorded here alphabetically.
+	 */
+
+	// TODO: Implement ADIW
+	// TODO: Implement ANDI
+	// TODO: Implement BCLR
+	// TODO: Implement BLD
+	// TODO: Implement BRBC
+	// TODO: Implement BRBS
+	// TODO: Implement BRCC
+	// TODO: Implement BRCS
+	// TODO: Implement BREAK
+	// TODO: Implement BREQ
+	// TODO: Implement BRGE
+	// TODO: Implement BRHC
+	// TODO: Implement BRHS
+	// TODO: Implement BRID
+	// TODO: Implement BRIE
+	// TODO: Implement BRLO
+	// TODO: Implement BRLT
+	// TODO: Implement BRSH
+	// TODO: Implement BRTC
+	// TODO: Implement BRTS
+	// TODO: Implement BRVC
+	// TODO: Implement BSET
+	// TODO: Implement BST
+	// TODO: Implement CALL
+	// TODO: Implement CBI
+	// TODO: Implement CBR
+	// TODO: Implement CLC
+	// TODO: Implement CLH
+	// TODO: Implement CLI
+	// TODO: Implement CLN
+	// TODO: Implement CLR
+	// TODO: Implement CLS
+	// TODO: Implement CLT
+	// TODO: Implement CLV
+	// TODO: Implement CLZ
+	// TODO: Implement CPI
+	// TODO: Implement CPSE
+	// TODO: Implement DES
+	// TODO: Implement EICALL
+	// TODO: Implement EIJMP
+	// TODO: Implement ELMP
+	// TODO: Implement FMUL
+	// TODO: Implement FMULS
+	// TODO: Implement FMULSU
+	// TODO: Implement ICALL
+	// TODO: Implement IJMP
+	// TODO: Implement IN
+	// TODO: Implement JMP
+	// TODO: Implement LAC
+	// TODO: Implement LAS
+	// TODO: Implement LAT
+	// TODO: Implement LD
+	// TODO: Implement LDI
+	// TODO: Implement LDS
+	// TODO: Implement LPM
+	// TODO: Implement LSL
+	// TODO: Implement LSR
+	// TODO: Implement MOVW
+	// TODO: Implement MUL
+	// TODO: Implement MULS
+	// TODO: Implement MULSU
+	// TODO: Implement NEG
+	// TODO: Implement NOP
+	// TODO: Implement ORI
+	// TODO: Implement OUT
+	// TODO: Implement POP
+	// TODO: Implement PUSH
+	// TODO: Implement RCALL
+	// TODO: Implement RET
+	// TODO: Implement RETI
+	// TODO: Implement RJMP
+	// TODO: Implement ROL
+	// TODO: Implement ROR
+	// TODO: Implement SBCI
+	// TODO: Implement SBI
+	// TODO: Implement SBIC
+	// TODO: Implement SBIS
+	// TODO: Implement SBIW
+	// TODO: Implement SBR
+	// TODO: Implement SBRC
+	// TODO: Implement SBRS
+	// TODO: Implement SEC
+	// TODO: Implement SEH
+	// TODO: Implement SEI
+	// TODO: Implement SEN
+	// TODO: Implement SER
+	// TODO: Implement SES
+	// TODO: Implement SET
+	// TODO: Implement SEV
+	// TODO: Implement SEZ
+	// TODO: Implement SLEEP
+	// TODO: Implement SPM
+	// TODO: Implement ST
+	// TODO: Implement STS
+	// TODO: Implement SUBI
+	// TODO: Implement SWAP
+	// TODO: Implement TST
+	// TODO: Implement WDR
+	// TODO: Implement XCH
+
 	private int instructionMov(int rr, int rd) {
 
 		r[rd] = r[rr];
