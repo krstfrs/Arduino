@@ -264,6 +264,41 @@ public class AVRCore {
 
 	}
 
+	private byte dataReadByte(int address) {
+
+		if (address == 0x5F) {
+
+			return (byte) ((i ? 0x80 : 0) & (t ? 0x40 : 0) & (h ? 0x20 : 0)
+					& (s ? 0x10 : 0) & (v ? 0x08 : 0) & (n ? 0x40 : 0)
+					& (z ? 0x20 : 0) & (c ? 0x10 : 0));
+
+		}
+
+		return datamem.readByte(address);
+
+	}
+
+	private void dataWriteByte(int address, byte data) {
+
+		if (address == 0x5F) {
+
+			i = (data & 0x80) != 0;
+			t = (data & 0x40) != 0;
+			h = (data & 0x20) != 0;
+			s = (data & 0x10) != 0;
+			v = (data & 0x08) != 0;
+			n = (data & 0x04) != 0;
+			z = (data & 0x02) != 0;
+			c = (data & 0x01) != 0;
+
+			return;
+
+		}
+
+		datamem.writeByte(address, data);
+
+	}
+
 	/*
 	 * The implemented instructions are grouped by type, however instructions
 	 * not yet implemented are recorded here alphabetically.
