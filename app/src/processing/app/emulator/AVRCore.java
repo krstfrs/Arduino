@@ -239,6 +239,27 @@ public class AVRCore {
 
 		}
 
+		// T bit operations
+		// 1111 10xd dddd 0bbb
+
+		if ((instruction & 0xFC08) == 0xF800) {
+
+			int rd = (instruction & 0x01F0) >>> 4;
+			int b = instruction & 0x0007;
+
+			int maskedInstruction = instruction & 0xFE08;
+
+			switch (maskedInstruction) {
+
+			case 0xF800:
+				return instructionBld(rd, b);
+			case 0xFA00:
+				return instructionBst(rd, b);
+
+			}
+
+		}
+
 		return 1;
 
 	}
@@ -248,7 +269,6 @@ public class AVRCore {
 	 * not yet implemented are recorded here alphabetically.
 	 */
 
-	// TODO: Implement BLD
 	// TODO: Implement BRBC
 	// TODO: Implement BRBS
 	// TODO: Implement BRCC
@@ -266,7 +286,6 @@ public class AVRCore {
 	// TODO: Implement BRTC
 	// TODO: Implement BRTS
 	// TODO: Implement BRVC
-	// TODO: Implement BST
 	// TODO: Implement CALL
 	// TODO: Implement CBI
 	// TODO: Implement CBR
@@ -780,6 +799,25 @@ public class AVRCore {
 			i = true;
 
 		}
+
+		return 1;
+
+	}
+
+	private int instructionBld(int rd, int b) {
+
+		if (t)
+			r[rd] |= (1 << b);
+		else
+			r[rd] &= ~(1 << b);
+
+		return 1;
+
+	}
+
+	private int instructionBst(int rd, int b) {
+
+		t = (r[rd] & (1 << b)) != 0;
 
 		return 1;
 
