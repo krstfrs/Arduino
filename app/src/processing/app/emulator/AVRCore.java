@@ -45,6 +45,7 @@ public class AVRCore {
 		// 0000 1xrd dddd rrrr
 		// 0001 xxrd dddd rrrr
 		// 0010 xxrd dddd rrrr
+		// 1001 11rd dddd rrrr (MUL)
 
 		if ((instruction & 0xFC00) == 0x0400
 				|| (instruction & 0xF800) == 0x0800
@@ -74,6 +75,8 @@ public class AVRCore {
 				return instructionEor(rd, rr);
 			case 0x2C00:
 				return instructionMov(rd, rr);
+			case 0x9C00:
+				return instructionMul(rd, rr);
 			case 0x2800:
 				return instructionOr(rd, rr);
 			case 0x0800:
@@ -169,6 +172,43 @@ public class AVRCore {
 
 		}
 
+		// MULS
+		// 0000 0010 dddd rrrr
+
+		if ((instruction & 0xFF00) == 0x0200) {
+
+			int rd = ((instruction & 0x00F0) >>> 8) + 0x10;
+			int rr = (instruction & 0x000F) + 0x10;
+
+			return instructionMuls(rd, rr);
+
+		}
+
+		// Other multiply instructions
+		// 0000 0011 xddd xrrr
+
+		if ((instruction & 0xFF00) == 0x0300) {
+
+			int rd = ((instruction & 0x0070) >>> 8) + 0x10;
+			int rr = (instruction & 0x0007) + 0x10;
+
+			int maskedInstruction = instruction & 0xFF88;
+
+			switch (maskedInstruction) {
+
+			case 0x0308:
+				return instructionFmul(rd, rr);
+			case 0x0380:
+				return instructionFmuls(rd, rr);
+			case 0x0388:
+				return instructionFmulsu(rd, rr);
+			case 0x0300:
+				return instructionMulsu(rd, rr);
+
+			}
+
+		}
+
 		return 1;
 
 	}
@@ -216,9 +256,6 @@ public class AVRCore {
 	// TODO: Implement EICALL
 	// TODO: Implement EIJMP
 	// TODO: Implement ELMP
-	// TODO: Implement FMUL
-	// TODO: Implement FMULS
-	// TODO: Implement FMULSU
 	// TODO: Implement ICALL
 	// TODO: Implement IJMP
 	// TODO: Implement IN
@@ -231,9 +268,6 @@ public class AVRCore {
 	// TODO: Implement LDS
 	// TODO: Implement LPM
 	// TODO: Implement MOVW
-	// TODO: Implement MUL
-	// TODO: Implement MULS
-	// TODO: Implement MULSU
 	// TODO: Implement NOP
 	// TODO: Implement OUT
 	// TODO: Implement POP
@@ -596,6 +630,70 @@ public class AVRCore {
 
 		r[rdp] = res & 0xFF;
 		r[rdp + 1] = (res & 0xFF00) >>> 8;
+
+		return 2;
+
+	}
+
+	private int instructionFmul(int rd, int rr) {
+
+		return instructionHelperMul(rd, rr, false, false, true);
+
+	}
+
+	private int instructionFmuls(int rd, int rr) {
+
+		return instructionHelperMul(rd, rr, true, true, true);
+
+	}
+
+	private int instructionFmulsu(int rd, int rr) {
+
+		return instructionHelperMul(rd, rr, true, false, true);
+
+	}
+
+	private int instructionMul(int rd, int rr) {
+
+		return instructionHelperMul(rd, rr, false, false, false);
+
+	}
+
+	private int instructionMuls(int rd, int rr) {
+
+		return instructionHelperMul(rd, rr, true, true, false);
+
+	}
+
+	private int instructionMulsu(int rd, int rr) {
+
+		return instructionHelperMul(rd, rr, true, false, false);
+
+	}
+
+	private int instructionHelperMul(int rd, int rr, boolean rdsigned,
+			boolean rrsigned, boolean shift) {
+
+		int rrd = r[rd];
+		int rrr = r[rr];
+
+		if (rdsigned && (rrd & 0x80) != 0)
+			rrd &= 0xFFFFFF00;
+
+		if (rrsigned && (rrr & 0x80) != 0)
+			rrr &= 0xFFFFFF00;
+
+		int res = (rrd * rrr) & 0xFFFF;
+
+		c = (res & 0x8000) != 0;
+
+		if (shift)
+			res = (res << 1) & 0xFFFF;
+
+		z = (res == 0);
+
+		r[0] = res & 0xFF;
+		r[1] = (res & 0xFF00) >>> 8;
 
 		return 2;
 
