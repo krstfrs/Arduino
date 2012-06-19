@@ -135,14 +135,14 @@ public class AVRCore {
 
 			case 0x7000:
 				return instructionAndi(rd, k);
-				// case 0x3000:
-				// return instructionCpi(rd, k);
+			case 0x3000:
+				return instructionCpi(rd, k);
 			case 0x6000:
 				return instructionOri(rd, k);
-				// case 0x4000:
-				// return instructionSbci(rd, k);
-				// case 0x9000:
-				// return instructionSubi(rd, k);
+			case 0x4000:
+				return instructionSbci(rd, k);
+			case 0x9000:
+				return instructionSubi(rd, k);
 
 			}
 
@@ -211,7 +211,6 @@ public class AVRCore {
 	// TODO: Implement CLT
 	// TODO: Implement CLV
 	// TODO: Implement CLZ
-	// TODO: Implement CPI
 	// TODO: Implement CPSE
 	// TODO: Implement DES
 	// TODO: Implement EICALL
@@ -243,7 +242,6 @@ public class AVRCore {
 	// TODO: Implement RET
 	// TODO: Implement RETI
 	// TODO: Implement RJMP
-	// TODO: Implement SBCI
 	// TODO: Implement SBI
 	// TODO: Implement SBIC
 	// TODO: Implement SBIS
@@ -263,7 +261,6 @@ public class AVRCore {
 	// TODO: Implement SPM
 	// TODO: Implement ST
 	// TODO: Implement STS
-	// TODO: Implement SUBI
 	// TODO: Implement WDR
 	// TODO: Implement XCH
 
@@ -377,45 +374,63 @@ public class AVRCore {
 
 	private int instructionCp(int rd, int rr) {
 
-		return instructionHelperSub(rd, rr, false, false);
+		return instructionHelperSubi(rd, r[rr], false, false);
+
+	}
+
+	private int instructionCpi(int rd, int k) {
+
+		return instructionHelperSubi(rd, k, false, false);
 
 	}
 
 	private int instructionCpc(int rd, int rr) {
 
-		return instructionHelperSub(rd, rr, false, true);
+		return instructionHelperSubi(rd, r[rr], false, true);
 
 	}
 
 	private int instructionSbc(int rd, int rr) {
 
-		return instructionHelperSub(rd, rr, true, true);
+		return instructionHelperSubi(rd, r[rr], true, true);
+
+	}
+
+	private int instructionSbci(int rd, int k) {
+
+		return instructionHelperSubi(rd, k, true, true);
 
 	}
 
 	private int instructionSub(int rd, int rr) {
 
-		return instructionHelperSub(rd, rr, true, false);
+		return instructionHelperSubi(rd, r[rr], true, false);
 
 	}
 
-	private int instructionHelperSub(int rd, int rr, boolean save, boolean carry) {
+	private int instructionSubi(int rd, int k) {
+
+		return instructionHelperSubi(rd, k, true, false);
+
+	}
+
+	private int instructionHelperSubi(int rd, int k, boolean save, boolean carry) {
 
 		int cin = carry ? (c ? 1 : 0) : 0;
 
-		int res = (r[rd] - r[rr] - cin) & 0xFF;
+		int res = (r[rd] - k - cin) & 0xFF;
 
-		boolean rr3 = (r[rr] & 0x08) != 0;
+		boolean k3 = (k & 0x08) != 0;
 		boolean rd3 = (r[rd] & 0x08) != 0;
 		boolean res3 = (res & 0x08) != 0;
 
-		boolean rr7 = (r[rr] & 0x80) != 0;
+		boolean k7 = (k & 0x80) != 0;
 		boolean rd7 = (r[rd] & 0x80) != 0;
 		boolean res7 = (res & 0x80) != 0;
 
-		h = (!rd3 && rr3) || (rr3 && res3) || (res3 && !rd3);
-		c = (!rd7 && rr7) || (rr7 && res7) || (res7 && !rd7);
-		v = (rd7 && !rr7 && !res7) || (!rd7 && rr7 && res7);
+		h = (!rd3 && k3) || (k3 && res3) || (res3 && !rd3);
+		c = (!rd7 && k7) || (k7 && res7) || (res7 && !rd7);
+		v = (rd7 && !k7 && !res7) || (!rd7 && k7 && res7);
 		z = (res == 0);
 		n = res7;
 		s = n ^ v;
