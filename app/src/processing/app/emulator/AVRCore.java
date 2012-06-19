@@ -5,6 +5,8 @@ public class AVRCore {
 	private int ip;
 	private int[] r = new int[32];
 
+	private boolean i = false;
+	private boolean t = false;
 	private boolean h = false;
 	private boolean s = false;
 	private boolean v = false;
@@ -39,6 +41,10 @@ public class AVRCore {
 
 		if (instruction == 0x0000)
 			return 1;
+
+		/*
+		 * Arithmetic instructions
+		 */
 
 		// 2-operand instructions
 		// 0000 01rd dddd rrrr
@@ -209,6 +215,30 @@ public class AVRCore {
 
 		}
 
+		/*
+		 * Bit operations
+		 */
+
+		// SREG bit operations
+		// 1001 0100 xbbb 0000
+
+		if ((instruction & 0xFF0F) == 0x9408) {
+
+			int b = (instruction & 0x0070) >> 4;
+
+			int maskedInstruction = instruction & 0xFF8F;
+
+			switch (maskedInstruction) {
+
+			case 0x9418:
+				return instructionBclr(b);
+			case 0x9408:
+				return instructionBset(b);
+
+			}
+
+		}
+
 		return 1;
 
 	}
@@ -218,7 +248,6 @@ public class AVRCore {
 	 * not yet implemented are recorded here alphabetically.
 	 */
 
-	// TODO: Implement BCLR
 	// TODO: Implement BLD
 	// TODO: Implement BRBC
 	// TODO: Implement BRBS
@@ -237,7 +266,6 @@ public class AVRCore {
 	// TODO: Implement BRTC
 	// TODO: Implement BRTS
 	// TODO: Implement BRVC
-	// TODO: Implement BSET
 	// TODO: Implement BST
 	// TODO: Implement CALL
 	// TODO: Implement CBI
@@ -696,6 +724,64 @@ public class AVRCore {
 		r[1] = (res & 0xFF00) >>> 8;
 
 		return 2;
+
+	}
+
+	/*
+	 * Bit operations
+	 */
+
+	private int instructionBclr(int b) {
+
+		switch (b) {
+
+		case 0:
+			c = false;
+		case 1:
+			z = false;
+		case 2:
+			n = false;
+		case 3:
+			v = false;
+		case 4:
+			s = false;
+		case 5:
+			h = false;
+		case 6:
+			t = false;
+		case 7:
+			i = false;
+
+		}
+
+		return 1;
+
+	}
+
+	private int instructionBset(int b) {
+
+		switch (b) {
+
+		case 0:
+			c = true;
+		case 1:
+			z = true;
+		case 2:
+			n = true;
+		case 3:
+			v = true;
+		case 4:
+			s = true;
+		case 5:
+			h = true;
+		case 6:
+			t = true;
+		case 7:
+			i = true;
+
+		}
+
+		return 1;
 
 	}
 
