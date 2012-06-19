@@ -51,35 +51,35 @@ public class AVRCore {
 				|| (instruction & 0xF000) == 0x1000
 				|| (instruction & 0xF000) == 0x2000) {
 
-			int rr = ((instruction & 0x0200) >>> 5) & (instruction & 0x000F);
 			int rd = (instruction & 0x01F0) >>> 4;
+			int rr = ((instruction & 0x0200) >>> 5) & (instruction & 0x000F);
 
 			int maskedInstruction = instruction & 0xFC00;
 
 			switch (maskedInstruction) {
 
 			case 0x1C00:
-				return instructionAdc(rr, rd);
+				return instructionAdc(rd, rr);
 			case 0x0C00:
-				return instructionAdd(rr, rd);
+				return instructionAdd(rd, rr);
 			case 0x2000:
-				return instructionAnd(rr, rd);
+				return instructionAnd(rd, rr);
 			case 0x1400:
-				return instructionCp(rr, rd);
+				return instructionCp(rd, rr);
 			case 0x0400:
-				return instructionCpc(rr, rd);
+				return instructionCpc(rd, rr);
 			case 0x1000:
-				return instructionCpse(rr, rd);
+				return instructionCpse(rd, rr);
 			case 0x2400:
-				return instructionEor(rr, rd);
+				return instructionEor(rd, rr);
 			case 0x2C00:
-				return instructionMov(rr, rd);
+				return instructionMov(rd, rr);
 			case 0x2800:
-				return instructionOr(rr, rd);
+				return instructionOr(rd, rr);
 			case 0x0800:
-				return instructionSbc(rr, rd);
+				return instructionSbc(rd, rr);
 			case 0x1800:
-				return instructionSub(rr, rd);
+				return instructionSub(rd, rr);
 
 			}
 
@@ -153,8 +153,8 @@ public class AVRCore {
 
 		if ((instruction & 0xFE00) == 0x9600) {
 
-			int k = ((instruction & 0x00C0) >>> 2) & (instruction & 0x000F);
 			int rdp = (((instruction & 0x0030) >>> 4) << 1) + 24;
+			int k = ((instruction & 0x00C0) >>> 2) & (instruction & 0x000F);
 
 			int maskedInstruction = instruction & 0xFE00;
 
@@ -267,7 +267,11 @@ public class AVRCore {
 	// TODO: Implement WDR
 	// TODO: Implement XCH
 
-	private int instructionMov(int rr, int rd) {
+	/*
+	 * Arithmetic instructions
+	 */
+
+	private int instructionMov(int rd, int rr) {
 
 		r[rd] = r[rr];
 
@@ -275,7 +279,7 @@ public class AVRCore {
 
 	}
 
-	private int instructionAnd(int rr, int rd) {
+	private int instructionAnd(int rd, int rr) {
 
 		return instructionAndi(rd, r[rr]);
 
@@ -296,7 +300,7 @@ public class AVRCore {
 
 	}
 
-	private int instructionOr(int rr, int rd) {
+	private int instructionOr(int rd, int rr) {
 
 		return instructionOri(rd, r[rr]);
 
@@ -317,7 +321,7 @@ public class AVRCore {
 
 	}
 
-	private int instructionEor(int rr, int rd) {
+	private int instructionEor(int rd, int rr) {
 
 		int res = r[rr] ^ r[rd];
 
@@ -332,19 +336,19 @@ public class AVRCore {
 
 	}
 
-	private int instructionAdc(int rr, int rd) {
+	private int instructionAdc(int rd, int rr) {
 
-		return instructionAdcAdd(rr, rd, true);
-
-	}
-
-	private int instructionAdd(int rr, int rd) {
-
-		return instructionAdcAdd(rr, rd, false);
+		return instructionHelperAdd(rr, rd, true);
 
 	}
 
-	private int instructionAdcAdd(int rr, int rd, boolean carry) {
+	private int instructionAdd(int rd, int rr) {
+
+		return instructionHelperAdd(rr, rd, false);
+
+	}
+
+	private int instructionHelperAdd(int rd, int rr, boolean carry) {
 
 		int cin = carry ? (c ? 1 : 0) : 0;
 
@@ -371,32 +375,31 @@ public class AVRCore {
 
 	}
 
-	private int instructionCp(int rr, int rd) {
+	private int instructionCp(int rd, int rr) {
 
-		return instructionCpCpcSbcSub(rr, rd, false, false);
-
-	}
-
-	private int instructionCpc(int rr, int rd) {
-
-		return instructionCpCpcSbcSub(rr, rd, false, true);
+		return instructionHelperSub(rd, rr, false, false);
 
 	}
 
-	private int instructionSbc(int rr, int rd) {
+	private int instructionCpc(int rd, int rr) {
 
-		return instructionCpCpcSbcSub(rr, rd, true, true);
-
-	}
-
-	private int instructionSub(int rr, int rd) {
-
-		return instructionCpCpcSbcSub(rr, rd, true, false);
+		return instructionHelperSub(rd, rr, false, true);
 
 	}
 
-	private int instructionCpCpcSbcSub(int rr, int rd, boolean save,
-			boolean carry) {
+	private int instructionSbc(int rd, int rr) {
+
+		return instructionHelperSub(rd, rr, true, true);
+
+	}
+
+	private int instructionSub(int rd, int rr) {
+
+		return instructionHelperSub(rd, rr, true, false);
+
+	}
+
+	private int instructionHelperSub(int rd, int rr, boolean save, boolean carry) {
 
 		int cin = carry ? (c ? 1 : 0) : 0;
 
@@ -424,7 +427,7 @@ public class AVRCore {
 
 	}
 
-	private int instructionCpse(int rr, int rd) {
+	private int instructionCpse(int rd, int rr) {
 
 		throw new OpcodeNotImplementedException();
 
@@ -432,23 +435,23 @@ public class AVRCore {
 
 	private int instructionAsr(int rd) {
 
-		return instructionAsrLsrRor(rd, true, false);
+		return instructionHelperShr(rd, true, false);
 
 	}
 
 	private int instructionLsr(int rd) {
 
-		return instructionAsrLsrRor(rd, false, false);
+		return instructionHelperShr(rd, false, false);
 
 	}
 
 	private int instructionRor(int rd) {
 
-		return instructionAsrLsrRor(rd, false, true);
+		return instructionHelperShr(rd, false, true);
 
 	}
 
-	private int instructionAsrLsrRor(int rd, boolean arithmetic, boolean rotate) {
+	private int instructionHelperShr(int rd, boolean arithmetic, boolean rotate) {
 
 		int res = r[rd] >>> 1;
 
