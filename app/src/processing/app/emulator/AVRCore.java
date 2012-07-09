@@ -342,7 +342,6 @@ public class AVRCore {
 	// TODO: Implement LDS
 	// TODO: Implement LPM
 	// TODO: Implement MOVW
-	// TODO: Implement NOP
 	// TODO: Implement OUT
 	// TODO: Implement POP
 	// TODO: Implement PUSH
