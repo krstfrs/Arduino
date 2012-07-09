@@ -2,6 +2,10 @@ package processing.app.emulator;
 
 public class AVRCore {
 
+	private final static int X = 26;
+	private final static int Y = 28;
+	private final static int Z = 30;
+
 	private int ip;
 	private int[] r = new int[32];
 
@@ -260,6 +264,54 @@ public class AVRCore {
 
 		}
 
+		/*
+		 * Transfer operations
+		 */
+
+		// LD/ST
+		// 1001 00xd dddd xxxx
+
+		if ((instruction & 0xFC00) == 0x9000) {
+
+			int rd = (instruction & 0x01F0) >>> 4;
+
+			int maskedInstruction = instruction & 0xFC0F;
+
+			switch (maskedInstruction) {
+
+			case 0x900C:
+				return instructionLdX(rd);
+			case 0x900D:
+				return instructionLdXInc(rd);
+			case 0x900E:
+				return instructionLdDecX(rd);
+			case 0x9009:
+				return instructionLdYInc(rd);
+			case 0x900A:
+				return instructionLdDecY(rd);
+			case 0x9001:
+				return instructionLdZInc(rd);
+			case 0x9002:
+				return instructionLdDecZ(rd);
+			case 0x920C:
+				return instructionStX(rd);
+			case 0x920D:
+				return instructionStXInc(rd);
+			case 0x920E:
+				return instructionStDecX(rd);
+			case 0x9209:
+				return instructionStYInc(rd);
+			case 0x920A:
+				return instructionStDecY(rd);
+			case 0x9201:
+				return instructionStZInc(rd);
+			case 0x9202:
+				return instructionStDecZ(rd);
+
+			}
+
+		}
+
 		return 1;
 
 	}
@@ -337,7 +389,7 @@ public class AVRCore {
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
-	// TODO: Implement LD
+	// TODO: Implement LDD
 	// TODO: Implement LDI
 	// TODO: Implement LDS
 	// TODO: Implement LPM
@@ -358,7 +410,7 @@ public class AVRCore {
 	// TODO: Implement SER
 	// TODO: Implement SLEEP
 	// TODO: Implement SPM
-	// TODO: Implement ST
+	// TODO: Implement STD
 	// TODO: Implement STS
 	// TODO: Implement WDR
 	// TODO: Implement XCH
@@ -838,6 +890,113 @@ public class AVRCore {
 		t = (r[rd] & (1 << b)) != 0;
 
 		return 1;
+
+	}
+
+	private int instructionLdX(int rd) {
+
+		return instructionHelperLdSt(rd, X, false, false, false);
+
+	}
+
+	private int instructionLdDecX(int rd) {
+
+		return instructionHelperLdSt(rd, X, false, true, false);
+
+	}
+
+	private int instructionLdXInc(int rd) {
+
+		return instructionHelperLdSt(rd, X, false, false, true);
+
+	}
+
+	private int instructionLdDecY(int rd) {
+
+		return instructionHelperLdSt(rd, Y, false, true, false);
+
+	}
+
+	private int instructionLdYInc(int rd) {
+
+		return instructionHelperLdSt(rd, Y, false, false, true);
+
+	}
+
+	private int instructionLdDecZ(int rd) {
+
+		return instructionHelperLdSt(rd, Z, false, true, false);
+
+	}
+
+	private int instructionLdZInc(int rd) {
+
+		return instructionHelperLdSt(rd, Z, false, false, true);
+
+	}
+
+	private int instructionStX(int rd) {
+
+		return instructionHelperLdSt(rd, X, true, false, false);
+
+	}
+
+	private int instructionStDecX(int rd) {
+
+		return instructionHelperLdSt(rd, X, true, true, false);
+
+	}
+
+	private int instructionStXInc(int rd) {
+
+		return instructionHelperLdSt(rd, X, true, false, true);
+
+	}
+
+	private int instructionStDecY(int rd) {
+
+		return instructionHelperLdSt(rd, Y, true, true, false);
+
+	}
+
+	private int instructionStYInc(int rd) {
+
+		return instructionHelperLdSt(rd, Y, true, false, true);
+
+	}
+
+	private int instructionStDecZ(int rd) {
+
+		return instructionHelperLdSt(rd, Z, true, true, false);
+
+	}
+
+	private int instructionStZInc(int rd) {
+
+		return instructionHelperLdSt(rd, Z, true, false, true);
+
+	}
+
+	private int instructionHelperLdSt(int rd, int ri, boolean store,
+			boolean preDec, boolean postInc) {
+
+		int address = r[ri] & (r[ri + 1] << 8);
+
+		if (preDec)
+			address--;
+
+		if (store)
+			dataWriteByte(address, (byte) r[rd]);
+		else
+			r[rd] = dataReadByte(address);
+
+		if (postInc)
+			address++;
+
+		r[ri] = address & 0x0F;
+		r[ri + 1] = (address & 0xF0) >>> 8;
+
+		return 1; // FIXME: Cycle count not correct
 
 	}
 
