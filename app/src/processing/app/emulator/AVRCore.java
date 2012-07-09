@@ -324,15 +324,7 @@ public class AVRCore {
 	// TODO: Implement CALL
 	// TODO: Implement CBI
 	// TODO: Implement CBR
-	// TODO: Implement CLC
-	// TODO: Implement CLH
-	// TODO: Implement CLI
-	// TODO: Implement CLN
 	// TODO: Implement CLR
-	// TODO: Implement CLS
-	// TODO: Implement CLT
-	// TODO: Implement CLV
-	// TODO: Implement CLZ
 	// TODO: Implement CPSE
 	// TODO: Implement DES
 	// TODO: Implement EICALL
@@ -364,15 +356,7 @@ public class AVRCore {
 	// TODO: Implement SBR
 	// TODO: Implement SBRC
 	// TODO: Implement SBRS
-	// TODO: Implement SEC
-	// TODO: Implement SEH
-	// TODO: Implement SEI
-	// TODO: Implement SEN
 	// TODO: Implement SER
-	// TODO: Implement SES
-	// TODO: Implement SET
-	// TODO: Implement SEV
-	// TODO: Implement SEZ
 	// TODO: Implement SLEEP
 	// TODO: Implement SPM
 	// TODO: Implement ST
