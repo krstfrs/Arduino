@@ -312,6 +312,32 @@ public class AVRCore {
 
 		}
 
+		// LDD/STD
+		// 10k0 kkxd dddd xkkk
+
+		if ((instruction & 0xD000) == 0x8000) {
+
+			int rd = (instruction & 0x01F0) >>> 4;
+			int k = ((instruction & 0x2000) >>> 8)
+					& ((instruction & 0x0C00) >>> 7) & (instruction & 0x0007);
+
+			int maskedInstruction = instruction & 0xD208;
+
+			switch (maskedInstruction) {
+
+			case 0x8008:
+				return instructionLddY(rd, k);
+			case 0x8000:
+				return instructionLddZ(rd, k);
+			case 0x8208:
+				return instructionStdY(rd, k);
+			case 0x8200:
+				return instructionStdZ(rd, k);
+
+			}
+
+		}
+
 		return 1;
 
 	}
@@ -389,7 +415,6 @@ public class AVRCore {
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
-	// TODO: Implement LDD
 	// TODO: Implement LDI
 	// TODO: Implement LDS
 	// TODO: Implement LPM
@@ -410,7 +435,6 @@ public class AVRCore {
 	// TODO: Implement SER
 	// TODO: Implement SLEEP
 	// TODO: Implement SPM
-	// TODO: Implement STD
 	// TODO: Implement STS
 	// TODO: Implement WDR
 	// TODO: Implement XCH
@@ -1000,4 +1024,40 @@ public class AVRCore {
 
 	}
 
+	private int instructionLddY(int rd, int k) {
+
+		return instructionHelperLddStd(rd, k, Y, false);
+
+	}
+
+	private int instructionLddZ(int rd, int k) {
+
+		return instructionHelperLddStd(rd, k, Z, false);
+
+	}
+
+	private int instructionStdY(int rd, int k) {
+
+		return instructionHelperLddStd(rd, k, Y, true);
+
+	}
+
+	private int instructionStdZ(int rd, int k) {
+
+		return instructionHelperLddStd(rd, k, Z, true);
+
+	}
+
+	private int instructionHelperLddStd(int rd, int k, int ri, boolean store) {
+
+		int address = (r[ri] & (r[ri + 1] << 8)) + k;
+
+		if (store)
+			dataWriteByte(address, (byte) r[rd]);
+		else
+			r[rd] = dataReadByte(address);
+
+		return 1; // FIXME: Cycle count not correct
+
+	}
 }
