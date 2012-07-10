@@ -135,6 +135,7 @@ public class AVRCore {
 		// Register-immediate instructions
 		// 0011 KKKK hhhh KKKK
 		// 01xx KKKK hhhh KKKK
+		// 1110 KKKK hhhh KKKK (LDI)
 
 		if ((instruction & 0xF000) == 0x3000
 				|| (instruction & 0xC000) == 0x8000) {
@@ -156,6 +157,8 @@ public class AVRCore {
 				return instructionSbci(rd, k);
 			case 0x9000:
 				return instructionSubi(rd, k);
+			case 0xE000:
+				return instructionLdi(rd, k);
 
 			}
 
@@ -427,7 +430,6 @@ public class AVRCore {
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
-	// TODO: Implement LDI
 	// TODO: Implement LDS
 	// TODO: Implement LPM
 	// TODO: Implement OUT
@@ -623,6 +625,14 @@ public class AVRCore {
 
 		if (save)
 			r[rd] = res;
+
+		return 1;
+
+	}
+
+	private int instructionLdi(int rd, int k) {
+
+		r[rd] = k;
 
 		return 1;
 
