@@ -182,6 +182,18 @@ public class AVRCore {
 
 		}
 
+		// MOVW
+		// 0000 0001 dddd rrrr
+
+		if ((instruction & 0xFF00) == 0x0100) {
+
+			int rd = ((instruction & 0x00F0) >>> 8) << 1;
+			int rr = (instruction & 0x000F) << 1;
+
+			return instructionMovw(rd, rr);
+
+		}
+
 		// MULS
 		// 0000 0010 dddd rrrr
 
@@ -418,7 +430,6 @@ public class AVRCore {
 	// TODO: Implement LDI
 	// TODO: Implement LDS
 	// TODO: Implement LPM
-	// TODO: Implement MOVW
 	// TODO: Implement OUT
 	// TODO: Implement POP
 	// TODO: Implement PUSH
@@ -773,6 +784,15 @@ public class AVRCore {
 		r[rdp + 1] = (res & 0xFF00) >>> 8;
 
 		return 2;
+
+	}
+
+	private int instructionMovw(int rd, int rr) {
+
+		r[rd] = r[rr];
+		r[rd + 1] = r[rr + 1];
+
+		return 1;
 
 	}
 
