@@ -44,6 +44,8 @@ public class AVRCore {
 
 		int instruction = (progMem[ip] << 8) & progMem[ip + 1];
 
+		ip += 2;
+
 		// NOP
 
 		if (instruction == 0x0000)
@@ -381,6 +383,29 @@ public class AVRCore {
 
 		}
 
+		// LDS/STS
+		// 1001 00xd dddd 0000 kkkk kkkk kkkk kkkk
+
+		if ((instruction & 0xFC0F) == 0x9000) {
+
+			ip += 2;
+
+			int rd = (instruction & 0x01F0) >>> 4;
+			int k = (progMem[ip] << 8) & progMem[ip + 1];
+
+			int maskedInstruction = instruction & 0xFE00;
+
+			switch (maskedInstruction) {
+
+			case 0x9000:
+				return instructionLds(rd, k);
+			case 0x9200:
+				return instructionSts(rd, k);
+
+			}
+
+		}
+
 		// LPM
 		// 1001 000d dddd 010x
 
@@ -535,7 +560,6 @@ public class AVRCore {
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
-	// TODO: Implement LDS
 	// TODO: Implement RCALL
 	// TODO: Implement RET
 	// TODO: Implement RETI
@@ -546,7 +570,6 @@ public class AVRCore {
 	// TODO: Implement SBRS
 	// TODO: Implement SLEEP
 	// TODO: Implement SPM
-	// TODO: Implement STS
 	// TODO: Implement WDR
 	// TODO: Implement XCH
 
@@ -1228,6 +1251,22 @@ public class AVRCore {
 			r[rd] = dataReadByte(address);
 
 		return 1; // FIXME: Cycle count not correct
+
+	}
+
+	private int instructionLds(int rd, int k) {
+
+		r[rd] = dataReadByte(k);
+
+		return 2;
+
+	}
+
+	private int instructionSts(int rd, int k) {
+
+		dataWriteByte(k, (byte) r[rd]);
+
+		return 2;
 
 	}
 
