@@ -401,6 +401,27 @@ public class AVRCore {
 
 		}
 
+		// IN/OUT
+		// 1011 xaad dddd aaaa
+
+		if ((instruction & 0xF000) == 0xB000) {
+
+			int a = ((instruction & 0x0600) >>> 5) & (instruction & 0x000F);
+			int rd = (instruction & 0x01F0) >>> 4;
+
+			int maskedInstruction = instruction & 0xF800;
+
+			switch (maskedInstruction) {
+
+			case 0xB000:
+				return instructionIn(rd, a);
+			case 0xB800:
+				return instructionOut(rd, a);
+
+			}
+
+		}
+
 		/*
 		 * Misc instructions
 		 */
@@ -510,13 +531,11 @@ public class AVRCore {
 	// TODO: Implement ELMP
 	// TODO: Implement ICALL
 	// TODO: Implement IJMP
-	// TODO: Implement IN
 	// TODO: Implement JMP
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
 	// TODO: Implement LDS
-	// TODO: Implement OUT
 	// TODO: Implement RCALL
 	// TODO: Implement RET
 	// TODO: Implement RETI
@@ -1238,6 +1257,21 @@ public class AVRCore {
 
 		return 3;
 
+	}
+
+	private int instructionIn(int rd, int a) {
+
+		r[rd] = dataReadByte(a + 0x20);
+
+		return 1;
+
+	}
+
+	private int instructionOut(int rd, int a) {
+
+		dataWriteByte(a + 0x20, (byte) r[rd]);
+
+		return 1;
 	}
 
 }
