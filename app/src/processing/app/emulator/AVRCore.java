@@ -18,13 +18,15 @@ public class AVRCore {
 	private boolean z = false;
 	private boolean c = false;
 
-	private byte[] progmem;
-	private IAddressSpace datamem;
+	private byte[] progMem;
+	private byte[] dataMem;
+	private IAddressSpace ioRegisters;
 
-	public AVRCore(byte[] progmem, IAddressSpace datamem) {
+	public AVRCore(byte[] progMem, byte[] dataMem, IAddressSpace ioRegisters) {
 
-		this.progmem = progmem;
-		this.datamem = datamem;
+		this.progMem = progMem;
+		this.dataMem = dataMem;
+		this.ioRegisters = ioRegisters;
 
 	}
 
@@ -39,7 +41,7 @@ public class AVRCore {
 
 	private int emulateInstruction() {
 
-		int instruction = (progmem[ip] << 8) & progmem[ip + 1];
+		int instruction = (progMem[ip] << 8) & progMem[ip + 1];
 
 		// NOP
 
@@ -390,19 +392,28 @@ public class AVRCore {
 
 	private byte dataReadByte(int address) {
 
-		if (address == 0x5F) {
+		if (address < 0x20)
+			return (byte) r[address];
 
+		if (address == 0x5F) {
 			return (byte) ((i ? 0x80 : 0) & (t ? 0x40 : 0) & (h ? 0x20 : 0)
 					& (s ? 0x10 : 0) & (v ? 0x08 : 0) & (n ? 0x40 : 0)
 					& (z ? 0x20 : 0) & (c ? 0x10 : 0));
-
 		}
 
-		return datamem.readByte(address);
+		if (address < 0x60) {
+
+			return ioRegisters.readByte(address - 0x20);
+		}
+
+		return dataMem[address];
 
 	}
 
 	private void dataWriteByte(int address, byte data) {
+
+		if (address < 0x20)
+			r[address] = data;
 
 		if (address == 0x5F) {
 
@@ -419,7 +430,13 @@ public class AVRCore {
 
 		}
 
-		datamem.writeByte(address, data);
+		if (address < 0x60) {
+
+			ioRegisters.writeByte(address - 0x20, data);
+
+		}
+
+		dataMem[address] = data;
 
 	}
 
@@ -1143,7 +1160,7 @@ public class AVRCore {
 
 		int address = r[Z] & (r[Z + 1] << 8);
 
-		r[rd] = progmem[address];
+		r[rd] = progMem[address];
 
 		return 3;
 
