@@ -261,6 +261,27 @@ public class AVRCore {
 
 		}
 
+		// I/O register bit operations
+		// 1001 10xx aaaa abbb
+
+		if ((instruction & 0xFC00) == 0x9800) {
+
+			int a = (instruction & 0x00F8) >>> 3;
+			int b = instruction & 0x0007;
+
+			int maskedInstruction = instruction & 0xFF00;
+
+			switch (maskedInstruction) {
+
+			case 0x9800:
+				return instructionCbi(a, b);
+			case 0x9A00:
+				return instructionSbi(a, b);
+
+			}
+
+		}
+
 		// T bit operations
 		// 1111 10xd dddd 0bbb
 
@@ -482,7 +503,6 @@ public class AVRCore {
 	// TODO: Implement BRTS
 	// TODO: Implement BRVC
 	// TODO: Implement CALL
-	// TODO: Implement CBI
 	// TODO: Implement CBR
 	// TODO: Implement CLR
 	// TODO: Implement CPSE
@@ -503,7 +523,6 @@ public class AVRCore {
 	// TODO: Implement RET
 	// TODO: Implement RETI
 	// TODO: Implement RJMP
-	// TODO: Implement SBI
 	// TODO: Implement SBIC
 	// TODO: Implement SBIS
 	// TODO: Implement SBR
@@ -989,6 +1008,30 @@ public class AVRCore {
 		}
 
 		return 1;
+
+	}
+
+	private int instructionCbi(int a, int b) {
+
+		byte data = dataReadByte(a + 0x20);
+
+		data &= ~(1 << b);
+
+		dataWriteByte(a + 0x20, data);
+
+		return 2;
+
+	}
+
+	private int instructionSbi(int a, int b) {
+
+		byte data = dataReadByte(a + 0x20);
+
+		data |= (1 << b);
+
+		dataWriteByte(a + 0x20, data);
+
+		return 2;
 
 	}
 
