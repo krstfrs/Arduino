@@ -353,6 +353,37 @@ public class AVRCore {
 
 		}
 
+		// LPM
+		// 1001 000d dddd 010x
+
+		if ((instruction & 0xFE0E) == 0x9004) {
+
+			int rd = (instruction & 0x01F0) >>> 4;
+
+			int maskedInstruction = instruction & 0xFE0F;
+
+			switch (maskedInstruction) {
+
+			case 0x9004:
+				return instructionLpmZ(rd);
+			case 0x9005:
+				return instructionLpmZInc(rd);
+
+			}
+
+		}
+
+		/*
+		 * Misc instructions
+		 */
+
+		switch (instruction) {
+
+		case 0x95C8:
+			return instructionLpmR0();
+
+		}
+
 		return 1;
 
 	}
@@ -431,7 +462,6 @@ public class AVRCore {
 	// TODO: Implement LAS
 	// TODO: Implement LAT
 	// TODO: Implement LDS
-	// TODO: Implement LPM
 	// TODO: Implement OUT
 	// TODO: Implement POP
 	// TODO: Implement PUSH
@@ -1090,4 +1120,33 @@ public class AVRCore {
 		return 1; // FIXME: Cycle count not correct
 
 	}
+
+	private int instructionLpmR0() {
+
+		return instructionHelperLpm(0, false);
+
+	}
+
+	private int instructionLpmZ(int rd) {
+
+		return instructionHelperLpm(rd, false);
+
+	}
+
+	private int instructionLpmZInc(int rd) {
+
+		return instructionHelperLpm(rd, true);
+
+	}
+
+	private int instructionHelperLpm(int rd, boolean postInc) {
+
+		int address = r[Z] & (r[Z + 1] << 8);
+
+		r[rd] = progmem[address];
+
+		return 3;
+
+	}
+
 }
