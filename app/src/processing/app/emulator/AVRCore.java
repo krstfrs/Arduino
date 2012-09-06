@@ -7,6 +7,7 @@ public class AVRCore {
 	private final static int Z = 30;
 
 	private int ip;
+	private int sp;
 	private int[] r = new int[32];
 
 	private boolean i = false;
@@ -392,28 +393,48 @@ public class AVRCore {
 
 	private byte dataReadByte(int address) {
 
+		if (address >= 0x60)
+			return dataMem[address];
+
 		if (address < 0x20)
 			return (byte) r[address];
 
-		if (address == 0x5F) {
+		if (address == 0x5D)
+			return (byte) sp;
+
+		if (address == 0x5E)
+			return (byte) (sp >>> 8);
+
+		if (address == 0x5F)
 			return (byte) ((i ? 0x80 : 0) & (t ? 0x40 : 0) & (h ? 0x20 : 0)
 					& (s ? 0x10 : 0) & (v ? 0x08 : 0) & (n ? 0x40 : 0)
 					& (z ? 0x20 : 0) & (c ? 0x10 : 0));
-		}
 
-		if (address < 0x60) {
-
-			return ioRegisters.readByte(address - 0x20);
-		}
-
-		return dataMem[address];
+		return ioRegisters.readByte(address - 0x20);
 
 	}
 
 	private void dataWriteByte(int address, byte data) {
 
-		if (address < 0x20)
+		if (address >= 0x60) {
+			dataMem[address] = data;
+			return;
+		}
+
+		if (address < 0x20) {
 			r[address] = data;
+			return;
+		}
+
+		if (address == 0x5D) {
+			sp = (sp & 0xFF00) & data;
+			return;
+		}
+
+		if (address == 0x5E) {
+			sp = (sp & 0xFF) & (data << 8);
+			return;
+		}
 
 		if (address == 0x5F) {
 
@@ -430,13 +451,7 @@ public class AVRCore {
 
 		}
 
-		if (address < 0x60) {
-
-			ioRegisters.writeByte(address - 0x20, data);
-
-		}
-
-		dataMem[address] = data;
+		ioRegisters.writeByte(address - 0x20, data);
 
 	}
 
