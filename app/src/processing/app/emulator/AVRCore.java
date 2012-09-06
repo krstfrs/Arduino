@@ -386,7 +386,7 @@ public class AVRCore {
 
 		}
 
-		return 1;
+		throw new OpcodeNotImplementedException();
 
 	}
 
