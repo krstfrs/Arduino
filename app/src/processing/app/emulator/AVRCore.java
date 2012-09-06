@@ -503,7 +503,6 @@ public class AVRCore {
 	// TODO: Implement BRTS
 	// TODO: Implement BRVC
 	// TODO: Implement CALL
-	// TODO: Implement CLR
 	// TODO: Implement CPSE
 	// TODO: Implement DES
 	// TODO: Implement EICALL
@@ -526,7 +525,6 @@ public class AVRCore {
 	// TODO: Implement SBIS
 	// TODO: Implement SBRC
 	// TODO: Implement SBRS
-	// TODO: Implement SER
 	// TODO: Implement SLEEP
 	// TODO: Implement SPM
 	// TODO: Implement STS
