@@ -311,6 +311,8 @@ public class AVRCore {
 				return instructionLdZInc(rd);
 			case 0x9002:
 				return instructionLdDecZ(rd);
+			case 0x900F:
+				return instructionPop(rd);
 			case 0x920C:
 				return instructionStX(rd);
 			case 0x920D:
@@ -325,6 +327,8 @@ public class AVRCore {
 				return instructionStZInc(rd);
 			case 0x9202:
 				return instructionStDecZ(rd);
+			case 0x920F:
+				return instructionPush(rd);
 
 			}
 
@@ -495,8 +499,6 @@ public class AVRCore {
 	// TODO: Implement LAT
 	// TODO: Implement LDS
 	// TODO: Implement OUT
-	// TODO: Implement POP
-	// TODO: Implement PUSH
 	// TODO: Implement RCALL
 	// TODO: Implement RET
 	// TODO: Implement RETI
@@ -1113,6 +1115,24 @@ public class AVRCore {
 		r[ri + 1] = (address & 0xF0) >>> 8;
 
 		return 1; // FIXME: Cycle count not correct
+
+	}
+
+	private int instructionPop(int rd) {
+
+		sp++;
+
+		r[rd] = dataReadByte(sp);
+
+		return 2;
+
+	}
+
+	private int instructionPush(int rd) {
+
+		dataWriteByte(sp, (byte) r[rd]);
+
+		return 2;
 
 	}
 
