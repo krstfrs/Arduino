@@ -6,7 +6,7 @@ public class AVRCore {
 	private final static int Y = 28;
 	private final static int Z = 30;
 
-	private int ip;
+	private int pc;
 	private int sp;
 	private int[] r = new int[32];
 
@@ -42,9 +42,9 @@ public class AVRCore {
 
 	private int emulateInstruction() {
 
-		int instruction = (progMem[ip] << 8) & progMem[ip + 1];
+		int instruction = (progMem[pc * 2] << 8) & progMem[pc * 2 + 1];
 
-		ip += 2;
+		pc++;
 
 		// NOP
 
@@ -388,10 +388,10 @@ public class AVRCore {
 
 		if ((instruction & 0xFC0F) == 0x9000) {
 
-			ip += 2;
-
 			int rd = (instruction & 0x01F0) >>> 4;
-			int k = (progMem[ip] << 8) & progMem[ip + 1];
+			int k = (progMem[pc * 2] << 8) & progMem[pc * 2 + 1];
+
+			pc++;
 
 			int maskedInstruction = instruction & 0xFE00;
 
@@ -1341,7 +1341,7 @@ public class AVRCore {
 
 	private int instructionRjmp(int k) {
 
-		ip = ip + k * 2;
+		pc += k;
 
 		return 2;
 
@@ -1349,10 +1349,10 @@ public class AVRCore {
 
 	private int instructionRcall(int k) {
 
-		dataWriteByte(sp--, (byte) ip);
-		dataWriteByte(sp--, (byte) (ip >>> 8));
+		dataWriteByte(sp--, (byte) pc);
+		dataWriteByte(sp--, (byte) (pc >>> 8));
 
-		ip = ip + k * 2;
+		pc += k;
 
 		return 3; // FIXME: Cycle count not correct
 
@@ -1360,7 +1360,7 @@ public class AVRCore {
 
 	private int instructionIjmp() {
 
-		ip = r[Z] & (r[Z + 1] << 8);
+		pc = r[Z] & (r[Z + 1] << 8);
 
 		return 2;
 
@@ -1368,10 +1368,10 @@ public class AVRCore {
 
 	private int instructionIcall() {
 
-		dataWriteByte(sp--, (byte) ip);
-		dataWriteByte(sp--, (byte) (ip >>> 8));
+		dataWriteByte(sp--, (byte) pc);
+		dataWriteByte(sp--, (byte) (pc >>> 8));
 
-		ip = r[Z] & (r[Z + 1] << 8);
+		pc = r[Z] & (r[Z + 1] << 8);
 
 		return 3; // FIXME: Cycle count not correct
 
