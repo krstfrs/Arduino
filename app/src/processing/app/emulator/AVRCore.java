@@ -448,6 +448,31 @@ public class AVRCore {
 		}
 
 		/*
+		 * Jump instructions
+		 */
+
+		// RJMP/RCALL
+		// 110x kkkk kkkk kkkk
+
+		if ((instruction & 0xE000) == 0xC000) {
+
+			int k = (instruction & 0x0FFF)
+					& ((instruction & 0x0800) != 0 ? 0xF000 : 0x0000);
+
+			int maskedInstruction = instruction & 0xF000;
+
+			switch (maskedInstruction) {
+
+			case 0xC000:
+				return instructionRjmp(k);
+			case 0xD000:
+				return instructionRcall(k);
+
+			}
+
+		}
+
+		/*
 		 * Misc instructions
 		 */
 
@@ -563,7 +588,6 @@ public class AVRCore {
 	// TODO: Implement RCALL
 	// TODO: Implement RET
 	// TODO: Implement RETI
-	// TODO: Implement RJMP
 	// TODO: Implement SBIC
 	// TODO: Implement SBIS
 	// TODO: Implement SBRC
@@ -1311,6 +1335,25 @@ public class AVRCore {
 		dataWriteByte(a + 0x20, (byte) r[rd]);
 
 		return 1;
+	}
+
+	private int instructionRjmp(int k) {
+
+		ip = ip + k * 2;
+
+		return 2;
+
+	}
+
+	private int instructionRcall(int k) {
+
+		dataWriteByte(sp--, (byte) ip);
+		dataWriteByte(sp--, (byte) (ip >>> 8));
+
+		ip = ip + k * 2;
+
+		return 3; // FIXME: Cycle count not correct
+
 	}
 
 }
