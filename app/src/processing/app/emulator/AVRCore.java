@@ -478,6 +478,10 @@ public class AVRCore {
 
 		switch (instruction) {
 
+		case 0x9409:
+			return instructionIjmp();
+		case 0x9509:
+			return instructionIcall();
 		case 0x95C8:
 			return instructionLpmR0();
 
@@ -579,8 +583,6 @@ public class AVRCore {
 	// TODO: Implement EICALL
 	// TODO: Implement EIJMP
 	// TODO: Implement ELMP
-	// TODO: Implement ICALL
-	// TODO: Implement IJMP
 	// TODO: Implement JMP
 	// TODO: Implement LAC
 	// TODO: Implement LAS
@@ -1351,6 +1353,25 @@ public class AVRCore {
 		dataWriteByte(sp--, (byte) (ip >>> 8));
 
 		ip = ip + k * 2;
+
+		return 3; // FIXME: Cycle count not correct
+
+	}
+
+	private int instructionIjmp() {
+
+		ip = r[Z] & (r[Z + 1] << 8);
+
+		return 2;
+
+	}
+
+	private int instructionIcall() {
+
+		dataWriteByte(sp--, (byte) ip);
+		dataWriteByte(sp--, (byte) (ip >>> 8));
+
+		ip = r[Z] & (r[Z + 1] << 8);
 
 		return 3; // FIXME: Cycle count not correct
 
