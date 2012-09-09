@@ -472,6 +472,28 @@ public class AVRCore {
 
 		}
 
+		// JMP/CALL
+		// 1001 010k kkkk 11xk kkkk kkkk kkkk kkkk
+
+		if ((instruction & 0xFE0C) == 0x940C) {
+
+			int k = ((instruction & 0x01F0) << 13)
+					& ((instruction & 0x0001) << 16) & (progMem[pc * 2] << 8)
+					& progMem[pc * 2 + 1];
+
+			int maskedInstruction = instruction & 0xFE0E;
+
+			switch (maskedInstruction) {
+
+			case 0x940C:
+				return instructionJmp(k);
+			case 0x940E:
+				return instructionCall(k);
+
+			}
+
+		}
+
 		/*
 		 * Misc instructions
 		 */
@@ -577,13 +599,11 @@ public class AVRCore {
 	// TODO: Implement BRTC
 	// TODO: Implement BRTS
 	// TODO: Implement BRVC
-	// TODO: Implement CALL
 	// TODO: Implement CPSE
 	// TODO: Implement DES
 	// TODO: Implement EICALL
 	// TODO: Implement EIJMP
 	// TODO: Implement ELMP
-	// TODO: Implement JMP
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
@@ -1355,6 +1375,25 @@ public class AVRCore {
 		pc += k;
 
 		return 3; // FIXME: Cycle count not correct
+
+	}
+
+	private int instructionJmp(int k) {
+
+		pc = k;
+
+		return 3;
+
+	}
+
+	private int instructionCall(int k) {
+
+		dataWriteByte(sp--, (byte) pc);
+		dataWriteByte(sp--, (byte) (pc >>> 8));
+
+		pc = k;
+
+		return 4; // FIXME: Cycle count not correct
 
 	}
 
