@@ -1216,8 +1216,8 @@ public class AVRCore {
 		if (postInc)
 			address++;
 
-		r[ri] = address & 0x0F;
-		r[ri + 1] = (address & 0xF0) >>> 8;
+		r[ri] = address & 0x00FF;
+		r[ri + 1] = (address & 0xFF00) >>> 8;
 
 		return 1; // FIXME: Cycle count not correct
 
