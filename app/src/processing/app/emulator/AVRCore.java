@@ -494,6 +494,27 @@ public class AVRCore {
 
 		}
 
+		// BRBC/BRBS
+		// 1111 0xkk kkkk kbbb
+
+		if ((instruction & 0xF800) == 0xF000) {
+
+			int k = (instruction & 0x03F8) >>> 3;
+			int b = instruction & 0x0007;
+
+			int maskedInstruction = instruction & 0xFC00;
+
+			switch (maskedInstruction) {
+
+			case 0xF000:
+				return instructionBrbs(b, k);
+			case 0xF400:
+				return instructionBrbc(b, k);
+
+			}
+
+		}
+
 		/*
 		 * Misc instructions
 		 */
@@ -582,23 +603,6 @@ public class AVRCore {
 	 * not yet implemented are recorded here alphabetically.
 	 */
 
-	// TODO: Implement BRBC
-	// TODO: Implement BRBS
-	// TODO: Implement BRCC
-	// TODO: Implement BRCS
-	// TODO: Implement BREAK
-	// TODO: Implement BREQ
-	// TODO: Implement BRGE
-	// TODO: Implement BRHC
-	// TODO: Implement BRHS
-	// TODO: Implement BRID
-	// TODO: Implement BRIE
-	// TODO: Implement BRLO
-	// TODO: Implement BRLT
-	// TODO: Implement BRSH
-	// TODO: Implement BRTC
-	// TODO: Implement BRTS
-	// TODO: Implement BRVC
 	// TODO: Implement CPSE
 	// TODO: Implement DES
 	// TODO: Implement EICALL
@@ -1394,6 +1398,54 @@ public class AVRCore {
 		pc = k;
 
 		return 4; // FIXME: Cycle count not correct
+
+	}
+
+	private int instructionBrbs(int b, int k) {
+
+		return instructionHelperBrbsBrbc(b, k, true);
+
+	}
+
+	private int instructionBrbc(int b, int k) {
+
+		return instructionHelperBrbsBrbc(b, k, false);
+
+	}
+
+	private int instructionHelperBrbsBrbc(int b, int k, boolean set) {
+
+		boolean bit = false;
+
+		switch (b) {
+
+		case 0:
+			bit = c;
+		case 1:
+			bit = z;
+		case 2:
+			bit = n;
+		case 3:
+			bit = v;
+		case 4:
+			bit = s;
+		case 5:
+			bit = h;
+		case 6:
+			bit = t;
+		case 7:
+			bit = i;
+
+		}
+
+		if (bit == set) {
+
+			pc += k;
+			return 2;
+
+		}
+
+		return 1;
 
 	}
 
