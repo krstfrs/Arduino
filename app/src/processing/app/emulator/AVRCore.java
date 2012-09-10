@@ -607,11 +607,10 @@ public class AVRCore {
 	// TODO: Implement DES
 	// TODO: Implement EICALL
 	// TODO: Implement EIJMP
-	// TODO: Implement ELMP
+	// TODO: Implement ELPM
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
-	// TODO: Implement RCALL
 	// TODO: Implement RET
 	// TODO: Implement RETI
 	// TODO: Implement SBIC
