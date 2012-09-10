@@ -523,8 +523,12 @@ public class AVRCore {
 
 		case 0x9409:
 			return instructionIjmp();
+		case 0x9508:
+			return instructionRet();
 		case 0x9509:
 			return instructionIcall();
+		case 0x9518:
+			return instructionReti();
 		case 0x95C8:
 			return instructionLpmR0();
 
@@ -611,8 +615,6 @@ public class AVRCore {
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
-	// TODO: Implement RET
-	// TODO: Implement RETI
 	// TODO: Implement SBIC
 	// TODO: Implement SBIS
 	// TODO: Implement SBRC
@@ -1464,6 +1466,24 @@ public class AVRCore {
 		pc = r[Z] & (r[Z + 1] << 8);
 
 		return 3; // FIXME: Cycle count not correct
+
+	}
+
+	private int instructionRet() {
+
+		pc = (dataReadByte(++sp) << 8) & dataReadByte(++sp);
+
+		return 4; // FIXME: Cycle count not correct
+
+	}
+
+	private int instructionReti() {
+
+		pc = (dataReadByte(++sp) << 8) & dataReadByte(++sp);
+
+		i = true;
+
+		return 4; // FIXME: Cycle count not correct
 
 	}
 
