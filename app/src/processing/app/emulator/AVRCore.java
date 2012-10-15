@@ -277,15 +277,19 @@ public class AVRCore {
 
 			case 0x9800:
 				return instructionCbi(a, b);
+			case 0x9900:
+				return instructionSbic(a, b);
 			case 0x9A00:
 				return instructionSbi(a, b);
+			case 0x9B00:
+				return instructionSbis(a, b);
 
 			}
 
 		}
 
-		// T bit operations
-		// 1111 10xd dddd 0bbb
+		// T bit operations / SBRC/SBRS
+		// 1111 1xxd dddd 0bbb
 
 		if ((instruction & 0xFC08) == 0xF800) {
 
@@ -300,6 +304,10 @@ public class AVRCore {
 				return instructionBld(rd, b);
 			case 0xFA00:
 				return instructionBst(rd, b);
+			case 0xFC00:
+				return instructionSbrc(rd, b);
+			case 0xFE00:
+				return instructionSbrs(rd, b);
 
 			}
 
@@ -607,7 +615,6 @@ public class AVRCore {
 	 * not yet implemented are recorded here alphabetically.
 	 */
 
-	// TODO: Implement CPSE
 	// TODO: Implement DES
 	// TODO: Implement EICALL
 	// TODO: Implement EIJMP
@@ -615,10 +622,6 @@ public class AVRCore {
 	// TODO: Implement LAC
 	// TODO: Implement LAS
 	// TODO: Implement LAT
-	// TODO: Implement SBIC
-	// TODO: Implement SBIS
-	// TODO: Implement SBRC
-	// TODO: Implement SBRS
 	// TODO: Implement SLEEP
 	// TODO: Implement SPM
 	// TODO: Implement WDR
@@ -812,7 +815,7 @@ public class AVRCore {
 
 	private int instructionCpse(int rd, int rr) {
 
-		throw new OpcodeNotImplementedException();
+		return instructionHelperSkip(r[rd] == r[rr]);
 
 	}
 
@@ -1124,6 +1127,18 @@ public class AVRCore {
 
 	}
 
+	private int instructionSbic(int a, int b) {
+
+		return instructionHelperSkip((dataReadByte(a + 0x20) & (1 << b)) == 0);
+
+	}
+
+	private int instructionSbis(int a, int b) {
+
+		return instructionHelperSkip((dataReadByte(a + 0x20) & (1 << b)) != 0);
+
+	}
+
 	private int instructionBld(int rd, int b) {
 
 		if (t)
@@ -1140,6 +1155,18 @@ public class AVRCore {
 		t = (r[rd] & (1 << b)) != 0;
 
 		return 1;
+
+	}
+
+	private int instructionSbrc(int rd, int b) {
+
+		return instructionHelperSkip((r[rd] & (1 << b)) == 0);
+
+	}
+
+	private int instructionSbrs(int rd, int b) {
+
+		return instructionHelperSkip((r[rd] & (1 << b)) != 0);
 
 	}
 
@@ -1484,6 +1511,30 @@ public class AVRCore {
 		i = true;
 
 		return 4; // FIXME: Cycle count not correct
+
+	}
+
+	private int instructionHelperSkip(boolean skip) {
+
+		if (skip) {
+
+			int instruction = (progMem[pc * 2] << 8) & progMem[pc * 2 + 1];
+
+			if ((instruction & 0xFC0F) == 0x9000
+					|| (instruction & 0xFE0C) == 0x940C) {
+
+				pc += 2;
+				return 3;
+
+			} else {
+
+				pc++;
+				return 2;
+			}
+
+		}
+
+		return 1;
 
 	}
 
