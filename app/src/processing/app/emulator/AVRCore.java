@@ -615,17 +615,15 @@ public class AVRCore {
 	 * not yet implemented are recorded here alphabetically.
 	 */
 
-	// TODO: Implement DES
-	// TODO: Implement EICALL
-	// TODO: Implement EIJMP
-	// TODO: Implement ELPM
-	// TODO: Implement LAC
-	// TODO: Implement LAS
-	// TODO: Implement LAT
 	// TODO: Implement SLEEP
 	// TODO: Implement SPM
 	// TODO: Implement WDR
-	// TODO: Implement XCH
+
+	/*
+	 * Following instructions won't be implemented for now:
+	 * 
+	 * DES, EICALL, EIJMP, LAC, LAS, LAT, XCH
+	 */
 
 	/*
 	 * Arithmetic instructions
